@@ -1,0 +1,2 @@
+# logging
+Scala Logging Library
