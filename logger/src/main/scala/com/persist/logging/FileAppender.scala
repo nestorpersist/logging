@@ -1,0 +1,185 @@
+package com.persist.logging
+
+import java.io.{PrintWriter, BufferedOutputStream, FileOutputStream, File}
+import akka.actor._
+import com.persist.JsonOps._
+import scala.concurrent.duration._
+import scala.concurrent.{Promise, ExecutionContext, Future}
+import scala.language.postfixOps
+
+private[logging] object FileAppenderActor {
+
+  trait AppendMessages
+
+  case class AppendAdd(data: String, line: String) extends AppendMessages
+
+  case class AppendClose(p: Promise[Unit]) extends AppendMessages
+
+  case object AppendFlush extends AppendMessages
+
+  def props(path: String, category: String) = Props(new FileAppenderActor(path, category))
+}
+
+private[logging] class FileAppenderActor(path: String, category: String)
+  extends Actor with ActorLogging {
+
+  import FileAppenderActor._
+
+  private[this] val system = context.system
+  private[this] implicit val ec: ExecutionContext = context.dispatcher
+  private[this] var lastDate: String = ""
+  private[this] var optw: Option[PrintWriter] = None
+
+
+  private[this] var flushTimer: Option[Cancellable] = None
+
+
+  private def scheduleFlush() {
+    val time = system.scheduler.scheduleOnce(2 seconds) {
+      self ! AppendFlush
+    }
+    flushTimer = Some(time)
+  }
+
+  scheduleFlush()
+
+  private def open(date: String) {
+    val dir = s"$path"
+    new File(dir).mkdirs()
+    val fname = s"$dir/$category.$date.log"
+    val w = new PrintWriter(new BufferedOutputStream(new FileOutputStream(fname, true)))
+    optw = Some(w)
+    lastDate = date
+  }
+
+  def receive = {
+    case AppendAdd(date, line) =>
+      optw match {
+        case Some(w) =>
+          if (date != lastDate) {
+            w.close()
+            open(date)
+          }
+        case None =>
+          open(date)
+      }
+      optw match {
+        case Some(w) =>
+          w.println(line)
+        case None =>
+      }
+    case AppendFlush =>
+      optw match {
+        case Some(w) =>
+          w.flush()
+        case None =>
+      }
+      scheduleFlush()
+
+    case AppendClose(p) =>
+      flushTimer match {
+        case Some(t) => t.cancel()
+        case None =>
+      }
+      optw match {
+        case Some(w) =>
+          w.close()
+          optw = None
+        case None =>
+      }
+      p.success(())
+      context.stop(self)
+    case x: Any => log.warn(s"Bad appender message: $x")(() => DefaultSourceLocation)
+  }
+
+  override def postStop() {
+    optw match {
+      case Some(w) =>
+        w.close()
+        optw = None
+      case None =>
+    }
+  }
+}
+
+private[logging] case class FilesAppender(actorRefFactory: ActorRefFactory, serviceName: String,
+                                          path: String, category: String) {
+
+  import FileAppenderActor._
+
+  private[this] val fileAppenderActor = actorRefFactory.actorOf(
+    FileAppenderActor.props(path, category),
+    name = s"FileAppender.$category")
+
+  def add(date: String, line: String) {
+    fileAppenderActor ! AppendAdd(date, line)
+  }
+
+  def close(): Future[Unit] = {
+    val p = Promise[Unit]()
+    fileAppenderActor ! AppendClose(p)
+    p.future
+  }
+}
+
+/**
+ * Companion object for FileAppender class.
+ */
+object FileAppender extends LogAppenderBuilder {
+  /**
+   * Constructor for a file appender.
+   * @param factory an Akka factory.
+   * @param serviceName the name of the service.
+   * @return
+   */
+  def apply(factory: ActorRefFactory, serviceName: String) = new FileAppender(factory, serviceName)
+}
+
+/**
+ * An appender that writes log messages to files.
+ * @param factory
+ * @param serviceName
+ */
+class FileAppender(factory: ActorRefFactory, serviceName: String) extends LogAppender {
+  private[this] val system = factory match {
+    case context: ActorContext => context.system
+    case s: ActorSystem => s
+  }
+  private[this] implicit val executionContext = factory.dispatcher
+  private[this] val config = system.settings.config.getConfig("com.persist.logging.appenders.file")
+  private[this] val fullHeaders = config.getBoolean("fullHeaders")
+  private[this] val logPath = config.getString("logPath")
+  private[this] val sort = config.getBoolean("sorted")
+  private[this] val fileAppenders = scala.collection.mutable.HashMap[String, FilesAppender]()
+
+  /**
+   * Write the log message to a file.
+   * @param stdHeaders the headers that are fixes for this service.
+   * @param baseMsg the message to be logged.
+   * @param category  the kinds of log (for example, "common").
+   */
+  def append(stdHeaders: Map[String, RichMsg], baseMsg: Map[String, RichMsg], category: String): Unit = {
+    val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
+    val fa = fileAppenders.get(category) match {
+      case Some(a) => a
+      case None =>
+        val a = FilesAppender(factory, serviceName, logPath, category)
+        fileAppenders += (category -> a)
+        a
+    }
+    val date = jgetString(msg, "@timestamp").substring(0, 10)
+    fa.add(date, Compact(msg, safe = true, sort = sort))
+  }
+
+  /**
+   * Closes the file appender.
+   * @return a future that is completed when the close is complete.
+   */
+  def stop(): Future[Unit] = {
+    val fs = for ((category, appender) <- fileAppenders) yield {
+      appender.close()
+    }
+    Future.sequence(fs).map(s => ())
+  }
+}
+
