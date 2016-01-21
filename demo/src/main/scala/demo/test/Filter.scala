@@ -27,20 +27,15 @@ object Filter {
   import LoggingLevels._
 
 
-  def filter(fields: Map[String, RichMsg]): Boolean = {
-    val cls = fields.getOrElse("class", "") match {
-      case s: String => s
+  def filter(fields: Map[String, RichMsg], level:Level): Boolean = {
+    val cls = fields.get("class") match {
+      case Some(s: String) => s
       case _ => ""
     }
-    val sevs = fields.getOrElse("@severity", "") match {
-      case s: String => s
-      case _ => ""
-    }
-    val sev = Level(sevs)
     if (cls == "demo.test.Class1") {
-      sev >= DEBUG
+      level >= DEBUG
     } else {
-      sev >= WARN
+      level >= WARN
     }
   }
 

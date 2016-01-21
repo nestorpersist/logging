@@ -51,7 +51,7 @@ get you up and going fast.
 
 First you must include the logging jar
 
-    "com.persist" % "logging_2.11" % "1.0.0"
+    "com.persist" % "logging_2.11" % "1.1.0"
 Next add the following line to your `application.conf` file
 
     include "logging.conf"
@@ -188,7 +188,7 @@ These are listed in alphabetical order
 * **file.** The file containing the log call.
 * **kind.** Either slf4j or akka.  Not present for logger API.
 * **line.** The line where the message was logged.
-* ** msg.** The rich message.
+* **msg.** The rich message.
 * **trace.** Information for any exception specfied in the logging call.
 
 The fields @host, @service, and @version are the same for all messages
@@ -197,7 +197,7 @@ fullHeaders option is specified. This option is off by default for
 stdout and on by default for files. The @category option is also
 not present in stdout (because it contains only common messages).
 
-### Appenders
+### Appenders (see demo Appender)
 
 Appenders output log messages.
 There are two build-in appenders: stdout and file.

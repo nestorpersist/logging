@@ -11,17 +11,18 @@ object StdOutAppender extends LogAppenderBuilder {
   /**
    * A constructor for the StdOutAppender class.
    * @param factory an Akka factory.
-   * @param serviceName the name of the service.
+   * @param stdHeaders the headers that are fixes for this service.
    * @return the stdout appender.
    */
-  def apply(factory: ActorRefFactory, serviceName: String) = new StdOutAppender(factory)
+  def apply(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) = new StdOutAppender(factory, stdHeaders)
 }
 
 /**
  * A log appender that write common log messages to stdout.
  * @param factory an Akka factory.
+ * @param stdHeaders the headers that are fixes for this service.
  */
-class StdOutAppender(factory: ActorRefFactory) extends LogAppender {
+class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) extends LogAppender {
   private[this] val system = factory match {
     case context: ActorContext => context.system
     case s: ActorSystem => s
@@ -30,19 +31,31 @@ class StdOutAppender(factory: ActorRefFactory) extends LogAppender {
   private[this] val fullHeaders = config.getBoolean("fullHeaders")
   private[this] val color = config.getBoolean("color")
   private[this] val width = config.getInt("width")
+  private[this] val summary = config.getBoolean("summary")
+  private[this] var categories = Map.empty[String, Int]
+  private[this] var levels = Map.empty[String, Int]
+  private[this] var kinds = Map.empty[String, Int]
 
   /**
    * Writes a log message to stdout.
-   * @param stdHeaders the headers that are fixes for this service.
    * @param baseMsg the message to be logged.
    * @param category  the kinds of log (for example, "common").
    */
-  def append(stdHeaders: Map[String, RichMsg], baseMsg: Map[String, RichMsg], category: String): Unit = {
+  def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
     if (category == "common") {
+      val level = jgetString(baseMsg, "@severity")
+      if (summary) {
+        val cnt = levels.get(level).getOrElse(0) + 1
+        levels += (level -> cnt)
+        val kind = jgetString(baseMsg,"kind")
+        if (kind != "") {
+          val cnt = kinds.get(kind).getOrElse(0) + 1
+          kinds += (kind -> cnt)
+        }
+      }
       val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
-      val txt = Pretty(msg - "@category", safe = true, width=width)
+      val txt = Pretty(msg - "@category", safe = true, width = width)
       val colorTxt = if (color) {
-        val level = jgetString(msg, "@severity")
         level match {
           case "FATAL" | "ERROR" =>
             s"${Console.RED}$txt${Console.RESET}"
@@ -54,6 +67,9 @@ class StdOutAppender(factory: ActorRefFactory) extends LogAppender {
         txt
       }
       println(colorTxt)
+    } else if (summary) {
+      val cnt = categories.get(category).getOrElse(0) + 1
+      categories += (category -> cnt)
     }
   }
 
@@ -61,5 +77,19 @@ class StdOutAppender(factory: ActorRefFactory) extends LogAppender {
    * Closes the stdout appender.
    * @return a future that is completed when the close is complete.
    */
-  def stop(): Future[Unit] = Future.successful(())
+  def stop(): Future[Unit] = {
+    if (summary) {
+      val cats = if (categories.size == 0) emptyJsonObject else JsonObject("alts" -> categories)
+      val levs = if (levels.size == 0) emptyJsonObject else JsonObject("levels" -> levels)
+      val knds = if (kinds.size == 0) emptyJsonObject else JsonObject("kinds" -> kinds)
+      val txt = Pretty(levs ++ cats ++ knds, width = width)
+      val colorTxt = if (color) {
+        s"${Console.BLUE}$txt${Console.RESET}"
+      } else {
+        txt
+      }
+      println(colorTxt)
+    }
+    Future.successful(())
+  }
 }

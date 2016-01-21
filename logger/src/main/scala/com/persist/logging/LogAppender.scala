@@ -10,10 +10,10 @@ trait LogAppenderBuilder {
   /**
    * Log appender constructor.
    * @param factory an Akka factory.
-   * @param serviceName the name of the service.
-   * @return
+   * @param stdHeaders the headers that are fixes for this service.
+   * @return an appender
    */
-  def apply(factory: ActorRefFactory, serviceName: String): LogAppender
+  def apply(factory: ActorRefFactory, standardHeaders:Map[String,RichMsg]): LogAppender
 }
 
 /**
@@ -23,11 +23,10 @@ trait LogAppender {
 
   /**
    * Appends a new log message.
-   * @param stdHeaders the headers that are fixes for this service.
    * @param baseMsg the message to be logged.
    * @param category  the kinds of log (for example, "common").
    */
-  def append(stdHeaders: Map[String, RichMsg], baseMsg: Map[String, RichMsg], category: String)
+  def append(baseMsg: Map[String, RichMsg], category: String)
 
   /**
    * Stops a log appender.

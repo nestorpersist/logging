@@ -7,6 +7,7 @@ import ch.qos.logback.classic.LoggerContext
 import org.slf4j.LoggerFactory
 import scala.concurrent.{Promise, ExecutionContext, Future}
 import scala.language.postfixOps
+import com.persist.JsonOps._
 
 /**
  *
@@ -60,11 +61,14 @@ case class LoggingSystem(private val system: ActorSystem,
   LoggingState.doTime = false
   LoggingState.timeActorOption = None
 
+  private[this] val standardHeaders = JsonObject("@version" -> 1, "@host" -> host,
+    "@service" -> JsonObject("name" -> serviceName, "version" -> serviceVersion))
+
   private[this] val appenders = appenderBuilders.map {
-    _.apply(system, serviceName)
+    _.apply(system, standardHeaders)
   }
 
-  private[this] val logActor = system.actorOf(LogActor.props(done, serviceName, serviceVersion, host,
+  private[this] val logActor = system.actorOf(LogActor.props(done, standardHeaders,
     appenders, defaultLevel, defaultSlf4jLogLevel, defaultAkkaLogLevel), name = "LoggingActor")
   LoggingState.logger = Some(logActor)
 
@@ -154,10 +158,11 @@ case class LoggingSystem(private val system: ActorSystem,
    * You may want to increase the logging level after adding the filter.
    * Note that a filter together with an increased logging level will
    * require more processing overhead.
-   * @param filter  takes the complete common log message and returns false if
+   * @param filter  takes the complete common log message and the logging level
+   *                and returns false if
    *                that message is to be discarded.
    */
-  def setFilter(filter: Option[(Map[String, RichMsg]) => Boolean]): Unit = {
+  def setFilter(filter: Option[(Map[String, RichMsg], Level) => Boolean]): Unit = {
     logActor ! SetFilter(filter)
   }
 

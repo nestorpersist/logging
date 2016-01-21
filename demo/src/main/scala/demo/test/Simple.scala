@@ -15,7 +15,6 @@ case class SimpleClass() extends ClassLogging {
     log.error("Foo failed")
     log.warn(Map("@msg" -> "fail", "value" -> 23))
   }
-
 }
 
 object Simple {

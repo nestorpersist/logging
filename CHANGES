@@ -1,0 +1,9 @@
+1/21/2016 Version 1.1.0
+    Filter API changed
+    Appender API changed
+    Option to print summary counts on stdout
+    Added appender demo
+    Added richToString method
+    
+    
+    

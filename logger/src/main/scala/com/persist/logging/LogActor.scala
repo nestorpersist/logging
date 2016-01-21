@@ -34,34 +34,31 @@ private[logging] object LogActor {
 
   case object LastAkkaMessage extends LogActorMessage
 
-  case class SetFilter(filter: Option[(JsonObject) => Boolean]) extends LogActorMessage
+  case class SetFilter(filter: Option[(JsonObject, Level) => Boolean]) extends LogActorMessage
 
   case object StopLogging extends LogActorMessage
 
-  def props(done: Promise[Unit], serviceName: String, serviceVersion: String, host: String,
+  def props(done: Promise[Unit], standardHeaders: JsonObject,
             appends: Seq[LogAppender], initLevel: Level, initSlf4jLevel: Level, initAkkaLevel: Level)
-  = Props(new LogActor(done, serviceName, serviceVersion, host, appends,
+  = Props(new LogActor(done, standardHeaders, appends,
     initLevel, initSlf4jLevel, initAkkaLevel))
 
 }
 
-private[logging] class LogActor(done: Promise[Unit], serviceName: String, serviceVersion: String, host: String,
+private[logging] class LogActor(done: Promise[Unit], standardHeaders: JsonObject,
                                 appenders: Seq[LogAppender], initLevel: Level,
                                 initSlf4jLevel: Level, initAkkaLevel: Level) extends ActorLogging {
 
   import LogActor._
 
 
-  private[this] var filter: Option[(JsonObject) => Boolean] = None
+  private[this] var filter: Option[(JsonObject, Level) => Boolean] = None
   private[this] var level: Level = initLevel
   private[this] var akkaLogLevel: Level = initAkkaLevel
   private[this] var slf4jLogLevel: Level = initSlf4jLevel
 
   private[this] val logFmt = ISODateTimeFormat.dateTime()
   private[this] val system = context.system
-
-  private[this] val headers = JsonObject("@version" -> 1, "@host" -> host,
-    "@service" -> JsonObject("name" -> serviceName, "version" -> serviceVersion))
 
   private def exToJson(ex: Throwable): Json = {
     val name = ex.getClass.toString()
@@ -98,13 +95,13 @@ private[logging] class LogActor(done: Promise[Unit], serviceName: String, servic
     JsonObject("trace" -> JsonObject("msg" -> exToJson(ex), "stack" -> stack.toSeq)) ++ j1
   }
 
-  private def append(stdHeaders: JsonObject, baseMsg: JsonObject, category: String) {
+  private def append(stdHeaders: JsonObject, baseMsg: JsonObject, category: String, level: Level) {
     val keep = category != "common" || (filter match {
-      case Some(f) => f(stdHeaders ++ baseMsg)
+      case Some(f) => f(stdHeaders ++ baseMsg, level)
       case None => true
     })
     if (keep) {
-      for (a <- appenders) a.append(stdHeaders, baseMsg, category)
+      for (a <- appenders) a.append(baseMsg, category)
     }
   }
 
@@ -148,13 +145,13 @@ private[logging] class LogActor(done: Promise[Unit], serviceName: String, servic
         JsonObject("kind" -> kind)
       }
       val shortMsg = j ++ j0 ++ j1 ++ j2 ++ j3 ++ j4 ++ j5
-      append(headers, shortMsg, "common")
+      append(standardHeaders, shortMsg, "common", level)
 
     case SetLevel(level1) => level = level1
 
     case AltMessage(category, time, j) =>
       val t = logFmt.print(time)
-      append(headers, j ++ JsonObject("@timestamp" -> t), category)
+      append(standardHeaders, j ++ JsonObject("@timestamp" -> t), category, LoggingLevels.INFO)
 
     case Slf4jMessage(level, time, className, msg, line, file, ex) => {
       if (level.pos >= slf4jLogLevel.pos) {
@@ -172,7 +169,7 @@ private[logging] class LogActor(done: Promise[Unit], serviceName: String, servic
           exceptionJson(ex)
         }
         val shortMsg = j ++ j0 ++ j1
-        append(headers, shortMsg, "common")
+        append(standardHeaders, shortMsg, "common", level)
       }
     }
 
@@ -188,7 +185,7 @@ private[logging] class LogActor(done: Promise[Unit], serviceName: String, servic
         }
         val shortMsg = JsonObject("@timestamp" -> t, "kind" -> "akka", "msg" -> msg1.toString(), "actor" -> source,
           "@severity" -> level.name, "class" -> clazz.getName(), "@category" -> "common") ++ j1
-        append(headers, shortMsg, "common")
+        append(standardHeaders, shortMsg, "common", level)
       }
 
     case SetAkkaLevel(level) => akkaLogLevel = level

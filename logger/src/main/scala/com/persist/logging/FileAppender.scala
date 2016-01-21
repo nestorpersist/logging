@@ -102,7 +102,7 @@ private[logging] class FileAppenderActor(path: String, category: String)
   }
 }
 
-private[logging] case class FilesAppender(actorRefFactory: ActorRefFactory, serviceName: String,
+private[logging] case class FilesAppender(actorRefFactory: ActorRefFactory,
                                           path: String, category: String) {
 
   import FileAppenderActor._
@@ -129,18 +129,18 @@ object FileAppender extends LogAppenderBuilder {
   /**
    * Constructor for a file appender.
    * @param factory an Akka factory.
-   * @param serviceName the name of the service.
+   * @param stdHeaders the headers that are fixes for this service.
    * @return
    */
-  def apply(factory: ActorRefFactory, serviceName: String) = new FileAppender(factory, serviceName)
+  def apply(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) = new FileAppender(factory, stdHeaders)
 }
 
 /**
  * An appender that writes log messages to files.
  * @param factory
- * @param serviceName
+ * @param stdHeaders the headers that are fixes for this service.
  */
-class FileAppender(factory: ActorRefFactory, serviceName: String) extends LogAppender {
+class FileAppender(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) extends LogAppender {
   private[this] val system = factory match {
     case context: ActorContext => context.system
     case s: ActorSystem => s
@@ -154,16 +154,15 @@ class FileAppender(factory: ActorRefFactory, serviceName: String) extends LogApp
 
   /**
    * Write the log message to a file.
-   * @param stdHeaders the headers that are fixes for this service.
    * @param baseMsg the message to be logged.
    * @param category  the kinds of log (for example, "common").
    */
-  def append(stdHeaders: Map[String, RichMsg], baseMsg: Map[String, RichMsg], category: String): Unit = {
+  def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
     val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
     val fa = fileAppenders.get(category) match {
       case Some(a) => a
       case None =>
-        val a = FilesAppender(factory, serviceName, logPath, category)
+        val a = FilesAppender(factory, logPath, category)
         fileAppenders += (category -> a)
         a
     }
