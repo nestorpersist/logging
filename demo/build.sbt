@@ -1,8 +1,8 @@
-name := "logging-demo.test.demo"
+name := "logging-demo"
 
 organization := "com.persist"
 
-version := "0.0.1"
+version := "0.0.2"
 
 scalaVersion := "2.11.7"
 
@@ -18,5 +18,5 @@ lazy val root = (project in file(".")).
   )
 
 libraryDependencies ++= Seq(
-   "com.persist" % "persist-logging_2.11" % "1.1.0"
+  "com.persist" % "persist-logging_2.11" % "1.2.0"
 )

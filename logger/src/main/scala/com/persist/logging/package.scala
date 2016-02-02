@@ -18,14 +18,19 @@ package object logging {
   type RichMsg = Any
 
   /**
+   * Marker to indicate no exception is present
+   */
+  val noException = new Exception("No Exception")
+
+  /**
    * Convert a rich message to a printable string.
    * @param m  the rich message.
    * @return  a string that shows the message contents.
    */
-  def richToString(m:RichMsg):String = {
+  def richToString(m: RichMsg): String = {
     m match {
-      case s:String => s
-      case x => Compact(x, safe=true)
+      case s: String => s
+      case x => Compact(x, safe = true)
     }
   }
 

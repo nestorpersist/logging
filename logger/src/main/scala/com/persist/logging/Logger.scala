@@ -98,10 +98,13 @@ class Logger private[logging](private val actorName: Option[String] = None) {
    * @param category the category for the message. For log files, this will be part of the file name. The following
    *                 categories are often used: server, client, gc, and time.
    * @param m  fields to be included in the log message.
+   * @param ex  an optional exception to be logged together with its stack trace.
+   * @param id optional id of a request
    * @param time the time to be written in the log. If not specified the default is the time this
    *             method is called.
    */
-  def alternative(category: String, m: Map[String, RichMsg], time: Long = System.currentTimeMillis()) {
-    sendMsg(AltMessage(category, time, m ++ Map("@category" -> category)))
+  def alternative(category: String, m: Map[String, RichMsg], ex: Throwable = noException,
+                  id: AnyId = noId, time: Long = System.currentTimeMillis()) {
+    sendMsg(AltMessage(category, time, m ++ Map("@category" -> category), id, ex))
   }
 }

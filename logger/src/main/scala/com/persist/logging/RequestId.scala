@@ -19,7 +19,7 @@ sealed trait AnyId
  *              Optional, defaults to no per request control.
  */
 case class RequestId(trackingId: String = UUID.randomUUID().toString
-                     , spanId: String = "0"
+                     , spanId: String = ""
                      , level: Option[LoggingLevels.Level] = None) extends AnyId
 
 

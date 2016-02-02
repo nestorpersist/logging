@@ -27,6 +27,8 @@ case class LoggingSystem(private val system: ActorSystem,
 
   import LoggingLevels._
 
+  LoggingState.loggingSys = this
+
   private[this] val loggingConfig = system.settings.config.getConfig("com.persist.logging")
   private[this] val levels = loggingConfig.getString("logLevel")
   private[this] val defaultLevel: Level = if (Level.hasLevel(levels)) {
@@ -56,13 +58,16 @@ case class LoggingSystem(private val system: ActorSystem,
   private[this] val done = Promise[Unit]
   private[this] val timeActorDonePromise = Promise[Unit]
 
+  /**
+   * Standard headers.
+   */
+  val standardHeaders = Map[String,RichMsg]("@version" -> 1, "@host" -> host,
+    "@service" -> Map[String,RichMsg]("name"->serviceName,"version"->serviceVersion))
+
   setLevel(defaultLevel)
   LoggingState.loggerStopping = false
   LoggingState.doTime = false
   LoggingState.timeActorOption = None
-
-  private[this] val standardHeaders = JsonObject("@version" -> 1, "@host" -> host,
-    "@service" -> JsonObject("name" -> serviceName, "version" -> serviceVersion))
 
   private[this] val appenders = appenderBuilders.map {
     _.apply(system, standardHeaders)

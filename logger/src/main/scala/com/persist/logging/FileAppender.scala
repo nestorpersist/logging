@@ -132,7 +132,7 @@ object FileAppender extends LogAppenderBuilder {
    * @param stdHeaders the headers that are fixes for this service.
    * @return
    */
-  def apply(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) = new FileAppender(factory, stdHeaders)
+  def apply(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) = new FileAppender(factory, stdHeaders)
 }
 
 /**
@@ -140,7 +140,7 @@ object FileAppender extends LogAppenderBuilder {
  * @param factory
  * @param stdHeaders the headers that are fixes for this service.
  */
-class FileAppender(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) extends LogAppender {
+class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) extends LogAppender {
   private[this] val system = factory match {
     case context: ActorContext => context.system
     case s: ActorSystem => s
@@ -150,7 +150,13 @@ class FileAppender(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) ext
   private[this] val fullHeaders = config.getBoolean("fullHeaders")
   private[this] val logPath = config.getString("logPath")
   private[this] val sort = config.getBoolean("sorted")
+  private[this] val serviceInPath = config.getBoolean("serviceInPath")
   private[this] val fileAppenders = scala.collection.mutable.HashMap[String, FilesAppender]()
+  private[this] val fullPath: String = if (serviceInPath) {
+    logPath + "/" + jgetString(stdHeaders, "@service", "name")
+  } else {
+    logPath
+  }
 
   /**
    * Write the log message to a file.
@@ -162,7 +168,7 @@ class FileAppender(factory: ActorRefFactory, stdHeaders:Map[String,RichMsg]) ext
     val fa = fileAppenders.get(category) match {
       case Some(a) => a
       case None =>
-        val a = FilesAppender(factory, logPath, category)
+        val a = FilesAppender(factory, fullPath, category)
         fileAppenders += (category -> a)
         a
     }

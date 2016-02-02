@@ -10,7 +10,7 @@ trait LogAppenderBuilder {
   /**
    * Log appender constructor.
    * @param factory an Akka factory.
-   * @param stdHeaders the headers that are fixes for this service.
+   * @param standardHeaders the headers that are fixes for this service.
    * @return an appender
    */
   def apply(factory: ActorRefFactory, standardHeaders:Map[String,RichMsg]): LogAppender

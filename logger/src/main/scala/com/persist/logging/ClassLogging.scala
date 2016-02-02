@@ -9,6 +9,11 @@ package com.persist.logging
 trait ClassLogging {
 
   /**
+   * The logging system.
+   */
+  def loggingSystem:LoggingSystem = LoggingState.loggingSys
+
+  /**
    * The framework logger.
    */
   protected lazy val log = new Logger()

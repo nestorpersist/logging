@@ -51,7 +51,7 @@ get you up and going fast.
 
 First you must include the logging jar
 
-    "com.persist" % "logging_2.11" % "1.1.0"
+    "com.persist" % "logging_2.11" % "1.2.0"
 Next add the following line to your `application.conf` file
 
     include "logging.conf"
@@ -200,7 +200,8 @@ not present in stdout (because it contains only common messages).
 ### Appenders (see demo Appender)
 
 Appenders output log messages.
-There are two build-in appenders: stdout and file.
+There are tow build-in appenders: stdout and file
+plus an optional Kafka appenders.
 Each of these has its own configuration options
 (see `logging.conf` for details).
 You can also define your own appenders.
@@ -217,9 +218,11 @@ This appender is useful during development. It is usually
 Alterative, garbage collection, and timing messages have their own log files.
 Each log file includes a day as part of its name. Each day a new file
 is created.
+* **Kafka.** The kafka-appender directory contains a Kafka appender.
+See the README there for details on how to use.
 * **custom.** Custom appenders implement the `LogAppender` and
 `LogAppenderBuilder` traits. Custom loggers could be build for
-Kafka and Flume. Also note that custom loggers need not output
+Flume. Also note that custom loggers need not output
 Json but can instead have their own custom format.
 
 ### Json Utilities

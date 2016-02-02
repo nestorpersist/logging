@@ -34,7 +34,7 @@ private[logging] class Slf4jAppender[E]() extends UnsynchronizedAppenderBase[E] 
           val x = e.getThrowableProxy.asInstanceOf[ch.qos.logback.classic.spi.ThrowableProxy]
           x.getThrowable
         } catch {
-          case ex: Any => LoggingState.noException
+          case ex: Any => noException
         }
         val msg = Slf4jMessage(level, e.getTimeStamp, frame.getClassName,
           e.getFormattedMessage, frame.getLineNumber, frame.getFileName, ex)

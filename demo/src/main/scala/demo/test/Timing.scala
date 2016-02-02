@@ -7,7 +7,6 @@ import logging_demo.BuildInfo
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.concurrent.{Future, Await}
-import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits._
 
 case class TimeClass() extends ClassLogging with Timing {
@@ -49,10 +48,14 @@ case class FutureClass() extends ClassLogging with Timing {
       }
       result
     }
-    f2.onComplete { t =>
-      time.end(id, "", token)
+    val f3 = f2.recover{ case ex:Throwable =>
+      log.error("Timing test failed", ex)
+      -1
     }
-    f2
+    f3.map {  i =>
+      time.end(id, "", token)
+      i
+    }
   }
 }
 

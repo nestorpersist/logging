@@ -1,4 +1,4 @@
-name := "persist-logging"
+name := "kafka-appender"
 
 organization := "com.persist"
 
@@ -6,17 +6,21 @@ version := "1.2.0"
 
 scalaVersion := "2.11.7"
 
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
+scalacOptions ++= Seq("-deprecation", "-unchecked")
 
 viewSettings
 
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.1",
-  "joda-time" % "joda-time" % "2.9.1",
-  "ch.qos.logback" % "logback-classic"  % "1.0.13",
-  "com.persist" % "persist-json_2.11" % "1.1.1")
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "kafka_logging_demo"
+  )
 
+libraryDependencies ++= Seq(
+   "com.persist" % "persist-logging_2.11" % "1.2.0",
+   "org.apache.kafka" % "kafka-clients" % "0.8.2.2"
+)
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
@@ -47,4 +51,4 @@ pomExtra := (
       <url>http://http://www.persist.com</url>
     </developer>
   </developers>
-)
+  )

@@ -5,7 +5,6 @@ import akka.actor.Props
 import com.persist.Exceptions.SystemException
 import org.joda.time.format.ISODateTimeFormat
 import com.persist.JsonOps._
-import LoggingState._
 import LoggingLevels._
 import scala.language.postfixOps
 import scala.language.existentials
@@ -20,7 +19,7 @@ private[logging] object LogActor {
 
   case class SetLevel(level: Level) extends LogActorMessage
 
-  case class AltMessage(category: String, time: Long, j: JsonObject) extends LogActorMessage
+  case class AltMessage(category: String, time: Long, j: JsonObject, id: AnyId, ex: Throwable) extends LogActorMessage
 
   case class Slf4jMessage(level: Level, time: Long, className: String, msg: String, line: Int, file: String,
                           ex: Throwable) extends LogActorMessage
@@ -65,13 +64,14 @@ private[logging] class LogActor(done: Promise[Unit], standardHeaders: JsonObject
     ex match {
       case ex: RichException =>
         JsonObject("ex" -> name, "msg" -> ex.richMsg)
-      case ex: SystemException => JsonObject("kind" -> ex.kind, "info" -> ex.info)
+      case ex: SystemException =>
+        JsonObject("kind" -> ex.kind, "info" -> ex.info)
       case ex: Throwable =>
         JsonObject("ex" -> name, "msg" -> ex.getMessage)
     }
   }
 
-  private def exceptionJson(ex: Throwable): JsonObject = {
+  private def getStack(ex: Throwable): Seq[JsonObject] = {
     val stack = ex.getStackTrace map {
       case trace =>
         val j0 = if (trace.getLineNumber > 0) {
@@ -86,11 +86,17 @@ private[logging] class LogActor(done: Promise[Unit], standardHeaders: JsonObject
         )
         j0 ++ j1
     }
-    val cause = ex.getCause
-    val j1 = if (cause == null) {
-      emptyJsonObject
-    } else {
-      JsonObject("cause" -> exceptionJson(cause))
+    stack
+  }
+
+  private def exceptionJson(ex: Throwable): JsonObject = {
+    val stack = getStack(ex)
+    val j1 = ex match {
+      case r: RichException if r.cause != noException =>
+        JsonObject("cause" -> exceptionJson(r.cause))
+      case ex1: Throwable if ex.getCause() != null =>
+        JsonObject("cause" -> exceptionJson(ex.getCause()))
+      case _ => emptyJsonObject
     }
     JsonObject("trace" -> JsonObject("msg" -> exToJson(ex), "stack" -> stack.toSeq)) ++ j1
   }
@@ -149,9 +155,19 @@ private[logging] class LogActor(done: Promise[Unit], standardHeaders: JsonObject
 
     case SetLevel(level1) => level = level1
 
-    case AltMessage(category, time, j) =>
+    case AltMessage(category, time, j, id, ex) =>
       val t = logFmt.print(time)
-      append(standardHeaders, j ++ JsonObject("@timestamp" -> t), category, LoggingLevels.INFO)
+      val j3 = if (ex == noException) {
+        emptyJsonObject
+      } else {
+        exceptionJson(ex)
+      }
+      val j4 = id match {
+        case RequestId(trackingId, spanId, level) =>
+          JsonObject("@traceId" -> JsonArray(trackingId, spanId))
+        case noId => emptyJsonObject
+      }
+      append(standardHeaders, j ++ j3 ++ j4 ++ JsonObject("@timestamp" -> t), category, LoggingLevels.INFO)
 
     case Slf4jMessage(level, time, className, msg, line, file, ex) => {
       if (level.pos >= slf4jLogLevel.pos) {

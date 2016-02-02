@@ -15,11 +15,13 @@ private[logging] object LoggingState extends ClassLogging {
   // Queue of messages sent before logger is started
   private[logging] val msgs = new mutable.Queue[LogActorMessage]()
 
-  @volatile var doTrace: Boolean = false
+  @volatile var doTrace:Boolean = false
   @volatile var doDebug: Boolean = false
   @volatile var doInfo: Boolean = true
   @volatile var doWarn: Boolean = true
   @volatile var doError: Boolean = true
+
+  private[logging] var loggingSys: LoggingSystem = null
 
   private[logging] var logger: Option[ActorRef] = None
   @volatile private[logging] var loggerStopping = false
@@ -27,8 +29,6 @@ private[logging] object LoggingState extends ClassLogging {
   private[logging] var doTime: Boolean = false
   private[logging] var timeActorOption: Option[ActorRef] = None
 
-
-  private[logging] val noException = new Exception("No Exception")
 
   // Use to sync akka logging actor shutdown
   private[logging] val akkaStopPromise = Promise[Unit]
@@ -71,5 +71,4 @@ private[logging] object LoggingState extends ClassLogging {
         timeActor ! TimeEnd(id, name, uid, time)
     }
   }
-
 }

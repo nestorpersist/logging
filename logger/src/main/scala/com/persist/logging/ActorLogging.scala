@@ -12,6 +12,11 @@ trait ActorLogging extends Actor {
   private[this] val actorName = self.path.toString()
 
   /**
+   * The logging system.
+   */
+  def loggingSystem:LoggingSystem = LoggingState.loggingSys
+
+  /**
    * The logger.
    */
   protected lazy val log = new Logger(actorName = Some(actorName))
