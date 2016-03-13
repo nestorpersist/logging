@@ -2,7 +2,7 @@ name := "kafka-appender"
 
 organization := "com.persist"
 
-version := "1.2.0"
+version := "1.2.1"
 
 scalaVersion := "2.11.7"
 
@@ -18,8 +18,8 @@ lazy val root = (project in file(".")).
   )
 
 libraryDependencies ++= Seq(
-   "com.persist" % "persist-logging_2.11" % "1.2.0",
-   "org.apache.kafka" % "kafka-clients" % "0.8.2.2"
+   "com.persist" % "persist-logging_2.11" % "1.2.1",
+   "org.apache.kafka" % "kafka-clients" % "0.9.0.1"
 )
 
 publishTo <<= version { v: String =>

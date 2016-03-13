@@ -43,7 +43,7 @@ case class FutureClass() extends ClassLogging with Timing {
       val result = Time(id, "f2") {
         Thread.sleep(200)
         Time(id, "f2a") {
-          i * 2
+           i * 2
         }
       }
       result

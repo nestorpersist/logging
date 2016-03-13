@@ -18,5 +18,5 @@ lazy val root = (project in file(".")).
   )
 
 libraryDependencies ++= Seq(
-  "com.persist" % "persist-logging_2.11" % "1.2.0"
+  "com.persist" % "persist-logging_2.11" % "1.2.1"
 )
