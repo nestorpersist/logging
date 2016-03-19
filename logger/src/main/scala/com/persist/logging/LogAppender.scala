@@ -29,6 +29,12 @@ trait LogAppender {
   def append(baseMsg: Map[String, RichMsg], category: String)
 
   /**
+    * Called just before the logger shuts down.
+    * @return a future that is completed when finished.
+    */
+  def finish(): Future[Unit]
+
+  /**
    * Stops a log appender.
    * @return a future that is completed when stopped.
    */

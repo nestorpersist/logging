@@ -2,7 +2,7 @@ name := "persist-logging"
 
 organization := "com.persist"
 
-version := "1.2.1"
+version := "1.2.4"
 
 scalaVersion := "2.11.7"
 
@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.2",
   "joda-time" % "joda-time" % "2.9.2",
   "ch.qos.logback" % "logback-classic"  % "1.1.6",
-  "com.persist" % "persist-json_2.11" % "1.1.2")
+  "com.persist" % "persist-json_2.11" % "1.1.3")
 
 
 publishTo <<= version { v: String =>

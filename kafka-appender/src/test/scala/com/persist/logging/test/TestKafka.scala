@@ -4,7 +4,7 @@ import java.net.InetAddress
 import akka.actor.ActorSystem
 import com.persist.logging.kafka.KafkaAppender
 import com.persist.logging._
-import logging_demo.BuildInfo
+import kafka_logging_demo.BuildInfo
 import scala.language.postfixOps
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -12,8 +12,8 @@ import scala.concurrent.Await
 case class TestKafka() extends ClassLogging {
   def send: Unit = {
     for (i <- 1 to 5) {
-      log.warn(Map("@msg" -> "test", "i" -> i))
-      Thread.sleep(2000)
+      log.warn(Map("msg" -> "test", "i" -> i))
+      Thread.sleep(500)
     }
   }
 }
@@ -28,6 +28,8 @@ object TestKafka {
 
     val tc = TestKafka()
     tc.send
+
+    //Thread.sleep(60000)
 
     Await.result(loggingSystem.stop, 30 seconds)
     Await.result(system.terminate(), 20 seconds)

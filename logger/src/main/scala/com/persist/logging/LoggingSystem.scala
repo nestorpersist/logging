@@ -194,6 +194,10 @@ case class LoggingSystem(private val system: ActorSystem,
       done.future
     }
 
+    def finishAppenders(): Future[Unit] = {
+      Future.sequence(appenders map (_.finish())).map(x => ())
+    }
+
     def stopAppenders(): Future[Unit] = {
       Future.sequence(appenders map (_.stop())).map(x => ())
     }
@@ -207,6 +211,7 @@ case class LoggingSystem(private val system: ActorSystem,
 
     for {
       akkaTimeDone <- stopAkka() zip stopTimeActor()
+      logActorDone <- finishAppenders()
       logActorDone <- stopLogger()
       appendersDone <- stopAppenders()
     } yield appendersDone

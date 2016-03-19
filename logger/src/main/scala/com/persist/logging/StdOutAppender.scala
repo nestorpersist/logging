@@ -72,6 +72,13 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
       categories += (category -> cnt)
     }
   }
+  /**
+    * Called just before the logger shuts down.
+    * @return a future that is completed when finished.
+    */
+  def finish(): Future[Unit] = {
+    Future.successful(())
+  }
 
   /**
    * Closes the stdout appender.

@@ -177,6 +177,14 @@ class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) e
   }
 
   /**
+    * Called just before the logger shuts down.
+    * @return a future that is completed when finished.
+    */
+  def finish(): Future[Unit] = {
+    Future.successful(())
+  }
+
+  /**
    * Closes the file appender.
    * @return a future that is completed when the close is complete.
    */
