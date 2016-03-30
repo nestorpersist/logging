@@ -23,8 +23,6 @@ class CB extends Callback() with ClassLogging {
         if (sawTimeouts) log.error(JsonObject("fail"->"KAFKA", "error"->"messages lost","lost"->timeoutCnt))
         sawTimeouts = false
         timeoutCnt = 0
-        //println(exception.toString())
-        //println(metadata)
     }
   }
   def finish {
