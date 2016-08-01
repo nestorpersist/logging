@@ -49,16 +49,18 @@ The Scala logger contains lots of advanced features,  but this
 section introduces the simple core features that will
 get you up and going fast.
 
-First you must include the logging jar
-
-    "com.persist" % "logging_2.11" % "1.2.4"
+First you must add the logger to your sbt dependencies
+    
+    resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases"
+    libraryDependencies += "com.persist" % "persist-logging_2.11" % "1.2.4"
+    
 Next add the following line to your `application.conf` file
 
     include "logging.conf"
 
 In your Scala files that use logging add the following line
 
-    include com.persist.logging._
+    import com.persist.logging._
 
 At the beginning of your program, initialize the logging
 system as follows
