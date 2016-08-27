@@ -32,6 +32,7 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
   private[this] val color = config.getBoolean("color")
   private[this] val width = config.getInt("width")
   private[this] val summary = config.getBoolean("summary")
+  private[this] val pretty = config.getBoolean("pretty")
   private[this] var categories = Map.empty[String, Int]
   private[this] var levels = Map.empty[String, Int]
   private[this] var kinds = Map.empty[String, Int]
@@ -54,7 +55,11 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
         }
       }
       val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
-      val txt = Pretty(msg - "@category", safe = true, width = width)
+      val txt = if (pretty)
+        Pretty(msg - "@category", safe = true, width = width)
+      else
+        Compact(msg - "@category", safe = true)
+
       val colorTxt = if (color) {
         level match {
           case "FATAL" | "ERROR" =>
