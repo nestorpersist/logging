@@ -53,7 +53,7 @@ case class FutureClass() extends ClassLogging with Timing {
       -1
     }
     f3.map {  i =>
-      time.end(id, "", token)
+      time.end(id, "top", token)
       i
     }
   }

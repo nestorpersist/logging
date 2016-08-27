@@ -13,20 +13,23 @@ import scala.concurrent.Future
 class CB extends Callback() with ClassLogging {
   var timeoutCnt = 0
   var sawTimeouts = false
+
   override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
     exception match {
-      case ex:org.apache.kafka.common.errors.`TimeoutException` =>
-        if (! sawTimeouts) log.error(JsonObject("fail"->"KAFKA", "error" -> "Kafka timing out"))
+      case ex: org.apache.kafka.common.errors.`TimeoutException` =>
+        if (!sawTimeouts) log.error(JsonObject("fail" -> "KAFKA", "error" -> "Kafka timing out"))
         sawTimeouts = true
         timeoutCnt += 1
       case _ =>
-        if (sawTimeouts) log.error(JsonObject("fail"->"KAFKA", "error"->"messages lost","lost"->timeoutCnt))
+        if (sawTimeouts) log.error(JsonObject("fail" -> "KAFKA", "error" -> "messages lost", "lost" -> timeoutCnt))
         sawTimeouts = false
         timeoutCnt = 0
     }
   }
-  def finish {
-    if (timeoutCnt > 0) log.error(JsonObject("fail"->"KAFKA", "error"->"messages lost","lost"->timeoutCnt))
+
+  def finish(blockMs: Int) {
+    Thread.sleep(blockMs * 3) // ait for all messages to complete
+    if (timeoutCnt > 0) log.error(JsonObject("fail" -> "KAFKA", "error" -> "messages lost", "lost" -> timeoutCnt))
   }
 }
 
@@ -76,8 +79,8 @@ class KafkaAppender(factory: ActorRefFactory, standardHeaders: Map[String, RichM
     }
   }
 
-  override def finish():Future[Unit]  = {
-    cb.finish
+  override def finish(): Future[Unit] = {
+    cb.finish(blockMs)
     Future.successful(())
   }
 
