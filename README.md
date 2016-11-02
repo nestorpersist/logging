@@ -1,4 +1,5 @@
 # Scala Logging
+[![Maven Central](https://img.shields.io/maven-central/v/com.persist/persist-logging_2.11.svg)](https://maven-badges.herokuapp.com/maven-central/com.persist/persist-logging_2.11)
 
 This library provides an advanced logging facility for Scala applications.
 It has the following features.
