@@ -40,6 +40,8 @@ class FlatAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) e
     }
   }
 
+  def finish(): Future[Unit] = Future.successful(())
+
   def stop(): Future[Unit] = Future.successful(())
 }
 

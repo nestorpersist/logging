@@ -2,9 +2,8 @@ name := "logging-demo"
 
 organization := "com.persist"
 
-version := "0.0.2"
-
-scalaVersion := "2.11.7"
+version := "1.3.0"
+scalaVersion := "2.12.0"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
 
@@ -18,5 +17,5 @@ lazy val root = (project in file(".")).
   )
 
 libraryDependencies ++= Seq(
-  "com.persist" % "persist-logging_2.11" % "1.2.1"
+  "com.persist" % "persist-logging_2.12" % "1.3.0"
 )

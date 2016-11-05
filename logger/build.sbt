@@ -2,20 +2,20 @@ name := "persist-logging"
 
 organization := "com.persist"
 
-version := "1.2.5"
+version := "1.3.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.0"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 viewSettings
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.2",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.2",
-  "joda-time" % "joda-time" % "2.9.2",
-  "ch.qos.logback" % "logback-classic"  % "1.1.6",
-  "com.persist" % "persist-json_2.11" % "1.1.3")
+  "com.typesafe.akka" %% "akka-actor" % "2.4.12",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.12",
+  "joda-time" % "joda-time" % "2.9.5",
+  "ch.qos.logback" % "logback-classic"  % "1.1.7",
+  "com.persist" % "persist-json_2.12" % "1.2.0")
 
 
 publishTo <<= version { v: String =>
