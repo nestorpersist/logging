@@ -1,6 +1,6 @@
 # Scala Logging
+[![Latest version](https://index.scala-lang.org/nestorpersist/json/persist-json/latest.svg)](https://index.scala-lang.org/nestorpersist/json/persist-json)
 [![Maven Central](https://img.shields.io/maven-central/v/com.persist/persist-logging_2.12.svg)](https://maven-badges.herokuapp.com/maven-central/com.persist/persist-logging_2.12)
-[![Latest version](https://index.scala-lang.org/nestorpersist/logging/persist-logging/latest.svg)](https://index.scala-lang.org/nestorpersist/logging/persist-logging)
 
 This library provides an advanced logging facility for Scala applications.
 It has the following features.
