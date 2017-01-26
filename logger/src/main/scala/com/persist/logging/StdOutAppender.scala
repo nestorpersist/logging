@@ -1,7 +1,9 @@
 package com.persist.logging
 
-import akka.actor.{ActorSystem, ActorContext, ActorRefFactory}
+import akka.actor.{ActorContext, ActorRefFactory, ActorSystem}
 import com.persist.JsonOps._
+import com.persist.logging.LoggingLevels.Level
+
 import scala.concurrent.Future
 
 /**
@@ -33,6 +35,8 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
   private[this] val width = config.getInt("width")
   private[this] val summary = config.getBoolean("summary")
   private[this] val pretty = config.getBoolean("pretty")
+  private[this] val logLevelLimit = Level(config.getString("logLevelLimit"))
+
   private[this] var categories = Map.empty[String, Int]
   private[this] var levels = Map.empty[String, Int]
   private[this] var kinds = Map.empty[String, Int]
@@ -43,8 +47,8 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
    * @param category  the kinds of log (for example, "common").
    */
   def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
-    if (category == "common") {
-      val level = jgetString(baseMsg, "@severity")
+    val level = jgetString(baseMsg, "@severity")
+    if (category == "common" && Level(level) >= logLevelLimit) {
       if (summary) {
         val cnt = levels.get(level).getOrElse(0) + 1
         levels += (level -> cnt)

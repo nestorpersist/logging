@@ -5,6 +5,7 @@ import com.persist.logging.{ClassLogging, LogAppender, LogAppenderBuilder, RichM
 import com.persist.JsonOps._
 import java.util.Properties
 import com.persist.logging._
+import com.persist.logging.LoggingLevels.Level
 
 import org.apache.kafka.clients.producer._
 
@@ -48,6 +49,8 @@ class KafkaAppender(factory: ActorRefFactory, standardHeaders: Map[String, RichM
   private[this] val config = system.settings.config.getConfig("com.persist.logging.appenders.kafka")
   private[this] val fullHeaders = config.getBoolean("fullHeaders")
   private[this] val sort = config.getBoolean("sorted")
+  private[this] val logLevelLimit = Level(config.getString("logLevelLimit"))
+
   private[this] val topic = config.getString("topic")
   private[this] val bootstrapServers = config.getString("bootstrapServers")
   private[this] val acks = config.getString("acks")
@@ -71,11 +74,18 @@ class KafkaAppender(factory: ActorRefFactory, standardHeaders: Map[String, RichM
 
   private[this] val producer: Producer[String, String] = new KafkaProducer(props)
 
+  private def checkLevel(baseMsg: Map[String, RichMsg]): Boolean = {
+    val level = jgetString(baseMsg, "@severity")
+    Level(level) >= logLevelLimit
+  }
+
   override def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
-    val msg = if (fullHeaders) standardHeaders ++ baseMsg else baseMsg
-    val txt = Compact(msg, safe = true, sort = sort)
-    Future {
-      producer.send(new ProducerRecord[String, String](topic, txt), cb)
+    if (category != "common" || checkLevel(baseMsg)) {
+      val msg = if (fullHeaders) standardHeaders ++ baseMsg else baseMsg
+      val txt = Compact(msg, safe = true, sort = sort)
+      Future {
+        producer.send(new ProducerRecord[String, String](topic, txt), cb)
+      }
     }
   }
 

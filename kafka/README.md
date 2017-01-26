@@ -19,7 +19,7 @@ of the kafka appender.
 
 In addition to the logging jar you should also include
 
-    "com.persist" % "kafka-appender_2.12" % "1.3.0"
+    "com.persist" % "kafka-appender_2.12" % "1.3.1"
     
     "com.persist" % "kafka-appender_2.11" % "1.2.4"
 

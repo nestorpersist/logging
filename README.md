@@ -1,5 +1,6 @@
 # Scala Logging
 [![Maven Central](https://img.shields.io/maven-central/v/com.persist/persist-logging_2.12.svg)](https://maven-badges.herokuapp.com/maven-central/com.persist/persist-logging_2.12)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This library provides an advanced logging facility for Scala applications.
 It has the following features.
@@ -52,7 +53,7 @@ get you up and going fast.
 
 First you must include the logging jar
 
-    "com.persist" % "persist-logging_2.12" % "1.3.0"
+    "com.persist" % "persist-logging_2.12" % "1.3.1"
     
     "com.persist" % "persist-logging_2.11" % "1.2.5"
     

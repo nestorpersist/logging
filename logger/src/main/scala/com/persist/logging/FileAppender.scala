@@ -1,10 +1,13 @@
 package com.persist.logging
 
-import java.io.{PrintWriter, BufferedOutputStream, FileOutputStream, File}
+import java.io.{BufferedOutputStream, File, FileOutputStream, PrintWriter}
+
 import akka.actor._
 import com.persist.JsonOps._
+import com.persist.logging.LoggingLevels.Level
+
 import scala.concurrent.duration._
-import scala.concurrent.{Promise, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.postfixOps
 
 private[logging] object FileAppenderActor {
@@ -21,7 +24,7 @@ private[logging] object FileAppenderActor {
 }
 
 private[logging] class FileAppenderActor(path: String, category: String)
-  extends Actor with ActorLogging {
+extends Actor with ActorLogging {
 
   import FileAppenderActor._
 
@@ -123,23 +126,25 @@ private[logging] case class FilesAppender(actorRefFactory: ActorRefFactory,
 }
 
 /**
- * Companion object for FileAppender class.
- */
+  * Companion object for FileAppender class.
+  */
 object FileAppender extends LogAppenderBuilder {
   /**
-   * Constructor for a file appender.
-   * @param factory an Akka factory.
-   * @param stdHeaders the headers that are fixes for this service.
-   * @return
-   */
+    * Constructor for a file appender.
+    *
+    * @param factory    an Akka factory.
+    * @param stdHeaders the headers that are fixes for this service.
+    * @return
+    */
   def apply(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) = new FileAppender(factory, stdHeaders)
 }
 
 /**
- * An appender that writes log messages to files.
- * @param factory
- * @param stdHeaders the headers that are fixes for this service.
- */
+  * An appender that writes log messages to files.
+  *
+  * @param factory
+  * @param stdHeaders the headers that are fixes for this service.
+  */
 class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) extends LogAppender {
   private[this] val system = factory match {
     case context: ActorContext => context.system
@@ -151,6 +156,7 @@ class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) e
   private[this] val logPath = config.getString("logPath")
   private[this] val sort = config.getBoolean("sorted")
   private[this] val serviceInPath = config.getBoolean("serviceInPath")
+  private[this] val logLevelLimit = Level(config.getString("logLevelLimit"))
   private[this] val fileAppenders = scala.collection.mutable.HashMap[String, FilesAppender]()
   private[this] val fullPath: String = if (serviceInPath) {
     logPath + "/" + jgetString(stdHeaders, "@service", "name")
@@ -158,26 +164,35 @@ class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) e
     logPath
   }
 
+  private def checkLevel(baseMsg: Map[String, RichMsg]): Boolean = {
+    val level = jgetString(baseMsg, "@severity")
+    Level(level) >= logLevelLimit
+  }
+
   /**
-   * Write the log message to a file.
-   * @param baseMsg the message to be logged.
-   * @param category  the kinds of log (for example, "common").
-   */
+    * Write the log message to a file.
+    *
+    * @param baseMsg  the message to be logged.
+    * @param category the kinds of log (for example, "common").
+    */
   def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
-    val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
-    val fa = fileAppenders.get(category) match {
-      case Some(a) => a
-      case None =>
-        val a = FilesAppender(factory, fullPath, category)
-        fileAppenders += (category -> a)
-        a
+    if (category != "common" || checkLevel(baseMsg)) {
+      val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
+      val fa = fileAppenders.get(category) match {
+        case Some(a) => a
+        case None =>
+          val a = FilesAppender(factory, fullPath, category)
+          fileAppenders += (category -> a)
+          a
+      }
+      val date = jgetString(msg, "@timestamp").substring(0, 10)
+      fa.add(date, Compact(msg, safe = true, sort = sort))
     }
-    val date = jgetString(msg, "@timestamp").substring(0, 10)
-    fa.add(date, Compact(msg, safe = true, sort = sort))
   }
 
   /**
     * Called just before the logger shuts down.
+    *
     * @return a future that is completed when finished.
     */
   def finish(): Future[Unit] = {
@@ -185,9 +200,10 @@ class FileAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) e
   }
 
   /**
-   * Closes the file appender.
-   * @return a future that is completed when the close is complete.
-   */
+    * Closes the file appender.
+    *
+    * @return a future that is completed when the close is complete.
+    */
   def stop(): Future[Unit] = {
     val fs = for ((category, appender) <- fileAppenders) yield {
       appender.close()
