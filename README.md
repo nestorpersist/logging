@@ -1,4 +1,5 @@
 # Scala Logging
+[![Latest version](https://index.scala-lang.org/nestorpersist/logging/persist-logging/latest.svg)](https://index.scala-lang.org/nestorpersist/logging/persist-logging)
 [![Maven Central](https://img.shields.io/maven-central/v/com.persist/persist-logging_2.12.svg)](https://maven-badges.herokuapp.com/maven-central/com.persist/persist-logging_2.12)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
