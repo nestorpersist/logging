@@ -124,8 +124,10 @@ the map form by convention use the field name `@msg` for
 the main error message. This ensures in sorted output it will
 appear first.
 
-```log.warn(s"Size $size is too big")
-log.warn(Map("@msg"->"Size is too big","size"->size))```
+```
+    log.warn(s"Size $size is too big")
+    log.warn(Map("@msg"->"Size is too big","size"->size))
+```    
 
 * **ex.** Optional exception. 
 A `RichException` allows
@@ -134,14 +136,15 @@ The logger can expand that map into the logged Json.
 Ordinary Scala/Java exceptions
 will, of course, also work just fine. 
 
-
-      ```try {
+```
+    try {
          ...
          throw RichException(Map("@msg"->"Size is too big", "size"->size))
          ...
-      } catch {
+    } catch {
          case ex => log.error("Body failed", ex)
-      }```
+    }
+```    
 
 * **id.** Optional id. See the section below on Request Ids.
 
