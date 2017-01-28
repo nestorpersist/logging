@@ -43,7 +43,7 @@ subdirectory contains a project with sample uses of the logging api.
 * The [logging.conf](https://github.com/nestorpersist/logging/blob/master/logger/src/main/resources/logging.conf)
 file documents all the configuration options and specifies their default values.
 
-### Quick Start (see demo Simple)
+### Quick Start (see demo [Simple.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Simple.scala))
 
 The Scala logger contains lots of advanced features,  but this
 section introduces the simple core features that will
