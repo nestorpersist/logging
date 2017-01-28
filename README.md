@@ -38,8 +38,8 @@ send logs to other services (such as Kafka or Flume).
 
 * [ScalaDoc](http://nestorpersist.github.io/logging/latest/api/com/persist/logging/index.html)
 
-* The demo subdirectory contains a project with sample uses
- of the logging api.
+* The [demo](https://github.com/nestorpersist/logging/tree/master/demo/src/main/scala/demo/test)
+subdirectory contains a project with sample uses of the logging api.
 * The `logger/src/main/resources/logging.conf` file documents all the configuration options and specifies
  their default values.
 
