@@ -36,10 +36,7 @@ send logs to other services (such as Kafka or Flume).
 
 * This readme contains an overview of all features.
 
-* Scaladoc is available for the logging API.
- One way to view this is to use the sbt view plugin
-
-     <https://github.com/nestorpersist/sbt-view>
+* [ScalaDoc](http://nestorpersist.github.io/logging/latest/api/com/persist/logging/index.html)
 
 * The demo subdirectory contains a project with sample uses
  of the logging api.
