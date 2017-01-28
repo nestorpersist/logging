@@ -122,9 +122,10 @@ A typical log call takes the form
 Use the map form rather than string interpolation. When using
 the map form by convention use the field name `@msg` for
 the main error message. This ensures in sorted output it will
-apperar first.
+appear first.
 
       log.warn(s"Size $size is too big")
+      
       log.warn(Map("@msg"->"Size is too big","size"->size))
 
 * **ex.** Optional exception. 
