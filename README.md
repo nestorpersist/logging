@@ -151,8 +151,7 @@ will, of course, also work just fine.
 The full set of logging levels are trace, debug, info, warn, error
 and fatal.
 
-### Alternative Logging (see demo 
-[Alternative.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Alternative.scala))
+### Alternative Logging (see demo [Alternative.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Alternative.scala))
 
 You can create your own log files.
 
