@@ -40,8 +40,8 @@ send logs to other services (such as Kafka or Flume).
 
 * The [demo](https://github.com/nestorpersist/logging/tree/master/demo/src/main/scala/demo/test)
 subdirectory contains a project with sample uses of the logging api.
-* The `logger/src/main/resources/logging.conf` file documents all the configuration options and specifies
- their default values.
+* The [logging.conf](https://github.com/nestorpersist/logging/blob/master/logger/src/main/resources/logging.conf)
+file documents all the configuration options and specifies their default values.
 
 ### Quick Start (see demo Simple)
 
