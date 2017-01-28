@@ -10,6 +10,12 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 viewSettings
 
+ghpages.settings
+
+git.remoteRepo := "git@github.com:nestorpersist/logging.git"
+
+site.includeScaladoc()
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.4.12",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.12",

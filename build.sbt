@@ -16,3 +16,6 @@ lazy val demo = project.dependsOn(logger)
 lazy val kafka = project
 
 viewSettings
+
+
+
