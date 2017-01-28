@@ -264,7 +264,7 @@ See the section below on logging levels
 on how to more dynamically set the akka 
 logging level higher than the minimum. 
 
-### Java Logging (see demo [OtherApis](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/OtherApis.scala))
+### Java Logging (see demo [OtherApis.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/OtherApis.scala))
 
 If you include Java, code in your application, you will often find it
 uses Slf4J to do its logging.
