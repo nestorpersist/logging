@@ -136,12 +136,12 @@ Ordinary Scala/Java exceptions
 will, of course, also work just fine. 
 
 
-      try {\n
-         ...\n
-         throw RichException(Map("@msg"->"Size is too big", "size"->size))\n
-         ...\n
-      } catch {\n
-         case ex => log.error("Body failed", ex)\n
+      try {
+         ...
+         throw RichException(Map("@msg"->"Size is too big", "size"->size))
+         ...
+      } catch {
+         case ex => log.error("Body failed", ex)
       }
 
 * **id.** Optional id. See the section below on Request Ids.
