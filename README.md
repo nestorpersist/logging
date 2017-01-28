@@ -105,8 +105,7 @@ default configuration setting.
 
 The demo directory contains a sample `application.conf` file.
 
-### Basic Logging (see demo [Exceptions.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Exceptions.scala))
-
+### Basic Logging
 
 Logging is enabled by inheriting the trait `ClassLogging`
 (see demo 
