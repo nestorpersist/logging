@@ -105,11 +105,15 @@ default configuration setting.
 
 The demo directory contains a sample `application.conf` file.
 
-### Basic Logging (see demo Exceptions)
+### Basic Logging (see demo [Exceptions.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Exceptions.scala))
+
 
 Logging is enabled by inheriting the trait `ClassLogging`
-(see demo Simple) in classes and the
-trait `ActorLogging` in actors (see demo ActorDemo).
+(see demo 
+[Simple.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Simple.scala)).
+in classes and the
+trait `ActorLogging` in actors (see demo 
+[ActorDemo.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/ActorDemo.scala)).
 
 A typical log call takes the form
 
@@ -145,7 +149,9 @@ will, of course, also work just fine.
 The full set of logging levels are trace, debug, info, warn, error
 and fatal.
 
-### Alternative Logging (see demo Alternative)
+### Alternative Logging (see demo 
+https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Alternative.scala
+Alternative)
 
 You can create your own log files.
 
@@ -200,7 +206,7 @@ fullHeaders option is specified. This option is off by default for
 stdout and on by default for files. The @category option is also
 not present in stdout (because it contains only common messages).
 
-### Appenders (see demo Appender)
+### Appenders (see demo [Appender.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Appender.scala))
 
 Appenders output log messages.
 There are tow build-in appenders: stdout and file
@@ -242,7 +248,8 @@ To convert a log file to a Pretty version of that file.
 
     Pretty < common.2016-01-10.log > common.2016-01-10.pretty
 
-### Akka Logging (see demo OtherApis)
+### Akka Logging (see demo 
+[OtherApis.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/OtherApis.scala))
 
 Akka includes its own logger which can be added to Actors with the
 trait `akka.actor.ActorLogging`.
@@ -258,7 +265,8 @@ See the section below on logging levels
 on how to more dynamically set the akka 
 logging level higher than the minimum. 
 
-### Java Logging (see demo OtherApis)
+### Java Logging (see demo 
+[OtherApis](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/OtherApis.scala))
 
 If you include Java, code in your application, you will often find it
 uses Slf4J to do its logging.
@@ -294,7 +302,8 @@ calling methods on the `LoggingSystem` class.
 The log level also be changed on individual requests
 (see the section below on request ids).
 
-### Log Filters (see demo Filter)
+### Log Filters (see demo 
+[Filter.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Filter.scala))
 
 Logging filters provide a very powerful way of filtering common log
 messages. When a filter is enabled, a user specified function
@@ -323,7 +332,8 @@ introduce additional processing overhead.
 Garbage collection events are logged to the gc log when
 enabled by the `gc` configuration option.
 
-### Request Ids (see demo RequestIds)
+### Request Ids (see demo 
+[RequestIds.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/RequestIds.scala))
 
 Request Ids are based on the ideas from
 Google Dapper
@@ -366,7 +376,8 @@ this logger, two other things are needed.
 * An analysis program that can join information across logs and
    display them in a usable form.
 
-### Timing Logging (see demo Timing)
+### Timing Logging (see demo 
+[Timing.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Timing.scala))
 
 Time logging provides a simple way to get fine grain timing of
 dynamically nested blocks of code.
@@ -399,13 +410,13 @@ with rich messages.
 
 ### Acknowledgements 
 
-An earlier version of this logger was produced by Whitepages 
-(<http://www.whitepages.com>). 
+An earlier version of this logger was produced by [Whitepages] 
+(http://www.whitepages.com). 
 This earlier code can be found at 
-<https://github.com/whitepages/WP_Scala_Framework/tree/master/logging>. 
+[Framework](https://github.com/whitepages/WP_Scala_Framework/tree/master/logging). 
 
 Work improving this logger and making it suitable for general use was 
-supported by 47 Degrees <http://www.47deg.com>. 
+supported by [47 Degrees](http://www.47deg.com). 
 
 
 
