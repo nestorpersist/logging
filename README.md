@@ -51,9 +51,7 @@ get you up and going fast.
 
 First you must include the logging jar
 
-    "com.persist" % "persist-logging_2.12" % "1.3.1"
-    
-    "com.persist" % "persist-logging_2.11" % "1.2.5"
+    "com.persist" % "persist-logging_2.12" % "1.3.2"
     
 Next add the following line to your `application.conf` file
 

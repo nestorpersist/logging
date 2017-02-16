@@ -7,23 +7,25 @@ import com.persist.logging.LoggingLevels.Level
 import scala.concurrent.Future
 
 /**
- * Companion object for the StdOutAppender class.
- */
+  * Companion object for the StdOutAppender class.
+  */
 object StdOutAppender extends LogAppenderBuilder {
   /**
-   * A constructor for the StdOutAppender class.
-   * @param factory an Akka factory.
-   * @param stdHeaders the headers that are fixes for this service.
-   * @return the stdout appender.
-   */
+    * A constructor for the StdOutAppender class.
+    *
+    * @param factory    an Akka factory.
+    * @param stdHeaders the headers that are fixes for this service.
+    * @return the stdout appender.
+    */
   def apply(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) = new StdOutAppender(factory, stdHeaders)
 }
 
 /**
- * A log appender that write common log messages to stdout.
- * @param factory an Akka factory.
- * @param stdHeaders the headers that are fixes for this service.
- */
+  * A log appender that write common log messages to stdout.
+  *
+  * @param factory    an Akka factory.
+  * @param stdHeaders the headers that are fixes for this service.
+  */
 class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg]) extends LogAppender {
   private[this] val system = factory match {
     case context: ActorContext => context.system
@@ -35,6 +37,7 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
   private[this] val width = config.getInt("width")
   private[this] val summary = config.getBoolean("summary")
   private[this] val pretty = config.getBoolean("pretty")
+  private[this] val oneLine = config.getBoolean("oneLine")
   private[this] val logLevelLimit = Level(config.getString("logLevelLimit"))
 
   private[this] var categories = Map.empty[String, Int]
@@ -42,27 +45,41 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
   private[this] var kinds = Map.empty[String, Int]
 
   /**
-   * Writes a log message to stdout.
-   * @param baseMsg the message to be logged.
-   * @param category  the kinds of log (for example, "common").
-   */
+    * Writes a log message to stdout.
+    *
+    * @param baseMsg  the message to be logged.
+    * @param category the kinds of log (for example, "common").
+    */
   def append(baseMsg: Map[String, RichMsg], category: String): Unit = {
     val level = jgetString(baseMsg, "@severity")
     if (category == "common" && Level(level) >= logLevelLimit) {
       if (summary) {
         val cnt = levels.get(level).getOrElse(0) + 1
         levels += (level -> cnt)
-        val kind = jgetString(baseMsg,"kind")
+        val kind = jgetString(baseMsg, "kind")
         if (kind != "") {
           val cnt = kinds.get(kind).getOrElse(0) + 1
           kinds += (kind -> cnt)
         }
       }
       val msg = if (fullHeaders) stdHeaders ++ baseMsg else baseMsg
-      val txt = if (pretty)
+      val txt = if (oneLine) {
+        val msg0 = jget(baseMsg, "msg")
+        val msg = msg0 match {
+          case s: String => s
+          case x: Any => Compact(x, safe = true)
+        }
+        val kind0 = jgetString(baseMsg, "kind")
+        val kind = if (kind0 == "") "" else s":$kind0"
+        val file = jgetString(baseMsg, "file")
+        val line = jgetInt(baseMsg, "line")
+        val where = if (file != "") s" ($file $line)" else ""
+        s"[$level$kind] $msg$where"
+      } else if (pretty) {
         Pretty(msg - "@category", safe = true, width = width)
-      else
+      } else {
         Compact(msg - "@category", safe = true)
+      }
 
       val colorTxt = if (color) {
         level match {
@@ -81,8 +98,10 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
       categories += (category -> cnt)
     }
   }
+
   /**
     * Called just before the logger shuts down.
+    *
     * @return a future that is completed when finished.
     */
   def finish(): Future[Unit] = {
@@ -90,9 +109,10 @@ class StdOutAppender(factory: ActorRefFactory, stdHeaders: Map[String, RichMsg])
   }
 
   /**
-   * Closes the stdout appender.
-   * @return a future that is completed when the close is complete.
-   */
+    * Closes the stdout appender.
+    *
+    * @return a future that is completed when the close is complete.
+    */
   def stop(): Future[Unit] = {
     if (summary) {
       val cats = if (categories.size == 0) emptyJsonObject else JsonObject("alts" -> categories)

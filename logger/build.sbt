@@ -2,7 +2,7 @@ name := "persist-logging"
 
 organization := "com.persist"
 
-version := "1.3.1"
+version := "1.3.2"
 
 scalaVersion := "2.12.1"
 
