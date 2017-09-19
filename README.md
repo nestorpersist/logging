@@ -207,7 +207,7 @@ not present in stdout (because it contains only common messages).
 ### Appenders (see demo [Appender.scala](https://github.com/nestorpersist/logging/blob/master/demo/src/main/scala/demo/test/Appender.scala))
 
 Appenders output log messages.
-There are tow build-in appenders: stdout and file
+There are two build-in appenders: stdout and file
 plus an optional Kafka appenders.
 Each of these has its own configuration options
 (see `logging.conf` for details).
